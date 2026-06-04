@@ -60,4 +60,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("io.ktor:ktor-client-core:2.3.11")
+    implementation("io.ktor:ktor-client-cio:2.3.11")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.11")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.11")
 }
