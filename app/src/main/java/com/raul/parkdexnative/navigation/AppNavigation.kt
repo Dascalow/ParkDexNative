@@ -20,7 +20,7 @@ fun AppNavigation() {
     val context = LocalContext.current
     val themeManager = remember { ThemeManager(context) }
     val savedTheme by themeManager.getTheme.collectAsState(initial = "classic")
-    val sharedState = remember { SharedState() }
+    val sharedState = remember { SharedState(context) }
 
     LaunchedEffect(savedTheme) {
         sharedState.appTheme = savedTheme
