@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.raul.parkdexnative" />
+                  <option name="mobileSdkAppId" value="1:576566377365:android:988e2aab81ec8fe679549c" />
+                  <option name="projectId" value="park-dex-android-auth" />
+                  <option name="projectNumber" value="576566377365" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

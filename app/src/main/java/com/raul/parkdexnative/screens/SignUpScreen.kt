@@ -22,17 +22,21 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToSignUp: () -> Unit) {
+fun SignUpScreen(onSignUpSuccess: () -> Unit, onNavigateToLogin: () -> Unit) {
     var username by remember { mutableStateOf("") }
     var secretCode by remember { mutableStateOf("") }
+    var confirmSecretCode by remember { mutableStateOf("") }
 
-    // Starile pentru incarcare, eroare si Firebase
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val scope = rememberCoroutineScope()
     val auth = remember { FirebaseAuth.getInstance() }
 
     Box(
@@ -40,6 +44,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToSignUp: () -> Unit) {
             .fillMaxSize()
             .background(Color(0xFFEFEFEF))
     ) {
+        // Brazii identici de pe fundal din Login
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
             val height = size.height
@@ -74,14 +79,14 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToSignUp: () -> Unit) {
         ) {
             Text(
                 text = "PARK DEX",
-                fontSize = 36.sp,
+                fontSize = 32.sp,
                 fontWeight = FontWeight.Black,
                 letterSpacing = (-1).sp,
                 color = Color.Black
             )
 
             Text(
-                text = "UNAUTHORIZED ENCYCLOPEDIA",
+                text = "CREATE NEW PROFILE",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -92,27 +97,28 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToSignUp: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Butoanele de sus inversate ca sa arate ca esti pe Sign Up
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Button(
-                    onClick = { },
+                    onClick = onNavigateToLogin,
                     modifier = Modifier
                         .weight(1f)
                         .border(width = 3.dp, color = Color.Black),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF17A2B8)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                     shape = CutCornerShape(0.dp)
                 ) {
                     Text("LOGIN", fontWeight = FontWeight.Black, color = Color.Black)
                 }
 
                 Button(
-                    onClick = onNavigateToSignUp,
+                    onClick = { },
                     modifier = Modifier
                         .weight(1f)
                         .border(width = 3.dp, color = Color.Black),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2ECC71)), // Verde activ pentru Sign Up
                     shape = CutCornerShape(0.dp)
                 ) {
                     Text("SIGN UP", fontWeight = FontWeight.Black, color = Color.Black)
@@ -121,8 +127,9 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToSignUp: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Campul de Username
             Text(
-                text = "USERNAME / ALIAS",
+                text = "CHOOSE USERNAME / ALIAS",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier.fillMaxWidth(),
@@ -138,18 +145,17 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToSignUp: () -> Unit) {
                 placeholder = { Text("e.g. Coon, Mysterion", color = Color.Gray, fontSize = 13.sp) },
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = Color.Black) },
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = Color.Black
+                    focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = Color.Black, unfocusedTextColor = Color.Black
                 ),
                 shape = CutCornerShape(0.dp),
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
+            // Campul Secret Code (Parola)
             Text(
                 text = "SECRET CODE",
                 fontSize = 11.sp,
@@ -169,17 +175,45 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToSignUp: () -> Unit) {
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = Color.Black
+                    focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = Color.Black, unfocusedTextColor = Color.Black
                 ),
                 shape = CutCornerShape(0.dp),
                 singleLine = true
             )
 
-            // AM SCOS TEXTUL DE PAROLA UITATA SI AM PUS MESAJUL DE EROARE AICI
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Campul de Confirmare Parola
+            Text(
+                text = "CONFIRM SECRET CODE",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start
+            )
+            OutlinedTextField(
+                value = confirmSecretCode,
+                onValueChange = { confirmSecretCode = it; errorMessage = null },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .border(width = 2.dp, color = Color.Black),
+                placeholder = { Text("********", color = Color.Gray) },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Black) },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = Color.Black, unfocusedTextColor = Color.Black
+                ),
+                shape = CutCornerShape(0.dp),
+                singleLine = true
+            )
+
+            // Afisare erori stilizate
             if (errorMessage != null) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -191,23 +225,30 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToSignUp: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Butonul principal de trimitere
             Button(
                 onClick = {
                     val cleanUsername = username.trim().lowercase().replace(" ", "")
 
-                    if (cleanUsername.isBlank() || secretCode.isBlank()) {
-                        errorMessage = "Username and Secret Code are required, dude."
+                    if (cleanUsername.isBlank() || secretCode.isBlank() || confirmSecretCode.isBlank()) {
+                        errorMessage = "All fields are required, dude."
+                    } else if (secretCode.length < 6) {
+                        errorMessage = "Secret code must be at least 6 characters."
+                    } else if (secretCode != confirmSecretCode) {
+                        errorMessage = "Secret codes do not match."
                     } else {
                         val fakeEmail = "$cleanUsername@parkdex.com"
 
                         isLoading = true
-                        auth.signInWithEmailAndPassword(fakeEmail, secretCode)
+                        // Apelam Firebase ca sa creeze contul
+                        auth.createUserWithEmailAndPassword(fakeEmail, secretCode)
                             .addOnCompleteListener { task ->
                                 isLoading = false
                                 if (task.isSuccessful) {
-                                    onLoginSuccess()
+                                    onSignUpSuccess() // Cont creat cu succes! Mergem in aplicatie
                                 } else {
-                                    errorMessage = "Invalid Username or Secret Code."
+                                    // Daca ceva pica (ex: username deja luat), afisam eroarea de la server
+                                    errorMessage = task.exception?.localizedMessage ?: "Registration failed."
                                 }
                             }
                     }
@@ -224,7 +265,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToSignUp: () -> Unit) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
                 } else {
                     Text(
-                        text = "ENTER SOUTH PARK ->",
+                        text = "REGISTER KID ->",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Black,
                         color = Color.White

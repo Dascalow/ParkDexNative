@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.raul.parkdexnative.data.CharacterImageMapper
 import com.raul.parkdexnative.data.SharedState
 
 @Composable
@@ -25,27 +27,28 @@ fun FavoritesScreen(sharedState: SharedState) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(sharedState.themeBackgroundColor)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(width = 3.dp, color = Color.Black)
+                .border(width = 3.dp, color = sharedState.themeTextColor)
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(onClick = {}) {
-                Icon(Icons.Default.Menu, contentDescription = null, tint = Color.Black)
+                Icon(Icons.Default.Menu, contentDescription = null, tint = sharedState.themeTextColor)
             }
             Text(
                 text = "PARK DEX",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Black,
-                letterSpacing = (-1).sp
+                letterSpacing = (-1).sp,
+                color = sharedState.themeTextColor
             )
             IconButton(onClick = {}) {
-                Icon(Icons.Default.Search, contentDescription = null, tint = Color.Black)
+                Icon(Icons.Default.Search, contentDescription = null, tint = sharedState.themeTextColor)
             }
         }
 
@@ -58,7 +61,7 @@ fun FavoritesScreen(sharedState: SharedState) {
                 text = "My Roster",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
-                color = Color.Black
+                color = sharedState.themeTextColor
             )
 
             Row(
@@ -69,7 +72,7 @@ fun FavoritesScreen(sharedState: SharedState) {
                 Text(
                     text = "Your hand-picked squad of\ndegenerates.",
                     fontSize = 13.sp,
-                    color = Color.Gray,
+                    color = if (sharedState.appTheme == "dark") Color.LightGray else Color.Gray,
                     lineHeight = 18.sp
                 )
 
@@ -77,10 +80,10 @@ fun FavoritesScreen(sharedState: SharedState) {
                     text = "${sharedState.favoriteCharacters.size} SAVED",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
-                    color = Color.Black,
+                    color = Color.White,
                     modifier = Modifier
-                        .background(Color(0xFF17A2B8), shape = CutCornerShape(10.dp))
-                        .border(width = 2.dp, color = Color.Black, shape = CutCornerShape(10.dp))
+                        .background(sharedState.accentColor, shape = CutCornerShape(10.dp))
+                        .border(width = 2.dp, color = sharedState.themeTextColor, shape = CutCornerShape(10.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 )
             }
@@ -104,20 +107,26 @@ fun FavoritesScreen(sharedState: SharedState) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(width = 3.dp, color = Color.Black)
-                            .background(Color.White)
+                            .border(width = 3.dp, color = sharedState.themeTextColor)
+                            .background(sharedState.themeBackgroundColor)
+                            .clickable {
+                                sharedState.selectedCharacter = character
+                            }
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp)
-                                .background(Color(0XFFEFEFEF))
+                                .background(if (sharedState.appTheme == "dark") Color(0xFF333333) else Color(0XFFEFEFEF))
                         ) {
-                            Text(
-                                text = "[ SP IMG ]",
-                                color = Color.Gray,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.align(Alignment.Center)
+
+                            AsyncImage(
+                                model = CharacterImageMapper.getImageUrl(character.name), // Schimbat din .id în .name
+                                contentDescription = character.name,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Fit
                             )
 
                             IconButton(
@@ -125,8 +134,8 @@ fun FavoritesScreen(sharedState: SharedState) {
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
                                     .padding(8.dp)
-                                    .border(width = 2.dp, color = Color.Black, shape = CutCornerShape(20.dp))
-                                    .background(Color.White, shape = CutCornerShape(20.dp))
+                                    .border(width = 2.dp, color = sharedState.themeTextColor, shape = CutCornerShape(20.dp))
+                                    .background(sharedState.themeBackgroundColor, shape = CutCornerShape(20.dp))
                                     .size(36.dp)
                             ) {
                                 Icon(
@@ -141,17 +150,14 @@ fun FavoritesScreen(sharedState: SharedState) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .border(width = 3.dp, color = Color.Black)
-                                .background(Color.White)
-                                .clickable {
-                                    sharedState.selectedCharacter = character // ACEASTA ESTE LINIA NOUA
-                                }
+                                .border(width = 2.dp, color = sharedState.themeTextColor)
+                                .padding(12.dp)
                         ) {
                             Text(
                                 text = character.name,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Black,
-                                color = Color.Black
+                                color = sharedState.themeTextColor
                             )
                         }
                     }

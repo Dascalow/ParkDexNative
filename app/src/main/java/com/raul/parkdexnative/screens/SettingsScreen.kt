@@ -23,10 +23,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raul.parkdexnative.data.SharedState
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
+import com.raul.parkdexnative.ui.ThemeManager
 
 @Composable
 fun SettingsScreen(sharedState: SharedState) {
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    val themeManager = remember { ThemeManager(context) }
+    val scope = rememberCoroutineScope()
 
     val accentColors = listOf(
         Color(0XFFE74C3C), Color(0XFF3498DB), Color(0XFF2ECC71), Color(0XFFE67E22), Color(0xFF17A2B8)
@@ -88,7 +94,8 @@ fun SettingsScreen(sharedState: SharedState) {
                         val textBtnColor = if (themeId == "dark") Color.White else Color.Black
 
                         Button(
-                            onClick = { sharedState.appTheme = themeId },
+                            onClick = { sharedState.appTheme = themeId
+                                scope.launch { themeManager.saveTheme(themeId) }},
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .border(width = if (isSelected) 4.dp else 2.dp, color = sharedState.themeTextColor),

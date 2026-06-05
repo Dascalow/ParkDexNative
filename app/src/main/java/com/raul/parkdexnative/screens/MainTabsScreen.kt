@@ -19,9 +19,8 @@ import androidx.compose.ui.unit.sp
 import com.raul.parkdexnative.data.SharedState
 
 @Composable
-fun MainTabsScreen(onLogout: () -> Unit) {
+fun MainTabsScreen(sharedState: SharedState, onLogout: () -> Unit) {
     var selectedTab by remember { mutableStateOf(0) }
-    val sharedState = remember { SharedState() }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(

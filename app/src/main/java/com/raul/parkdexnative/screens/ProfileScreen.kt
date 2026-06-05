@@ -19,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.raul.parkdexnative.data.CharacterImageMapper
 import com.raul.parkdexnative.data.CharacterModel
 import com.raul.parkdexnative.data.SharedState
 
@@ -67,11 +69,13 @@ fun ProfileScreen(character: CharacterModel, sharedState: SharedState, onBackCli
                     .background(Color(0xFFE67E22))
                     .border(width = 3.dp, color = Color.Black)
             ) {
-                Text(
-                    text = "[ BANNER ]",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
+                AsyncImage(
+                    model = CharacterImageMapper.getImageUrl(character.name), // Schimbat din .id în .name
+                    contentDescription = character.name,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit
                 )
             }
 
