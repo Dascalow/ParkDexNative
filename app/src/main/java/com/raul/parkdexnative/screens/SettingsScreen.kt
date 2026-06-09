@@ -23,16 +23,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raul.parkdexnative.data.SharedState
-import androidx.compose.ui.platform.LocalContext
-import kotlinx.coroutines.launch
-import com.raul.parkdexnative.ui.ThemeManager
 
 @Composable
 fun SettingsScreen(sharedState: SharedState) {
     val scrollState = rememberScrollState()
-    val context = LocalContext.current
-    val themeManager = remember { ThemeManager(context) }
-    val scope = rememberCoroutineScope()
 
     val accentColors = listOf(
         Color(0XFFE74C3C), Color(0XFF3498DB), Color(0XFF2ECC71), Color(0XFFE67E22), Color(0xFF17A2B8)
@@ -41,20 +35,20 @@ fun SettingsScreen(sharedState: SharedState) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(sharedState.themeBackgroundColor) // FUNDAL DINAMIC
+            .background(sharedState.themeBackgroundColor)
             .verticalScroll(scrollState)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(width = 3.dp, color = sharedState.themeTextColor) // BORDER DINAMIC
+                .border(width = 3.dp, color = sharedState.themeTextColor)
                 .padding(16.dp)
         ) {
             Text(
                 text = "Settings",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
-                color = sharedState.themeTextColor // TEXT DINAMIC
+                color = sharedState.themeTextColor
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -94,8 +88,10 @@ fun SettingsScreen(sharedState: SharedState) {
                         val textBtnColor = if (themeId == "dark") Color.White else Color.Black
 
                         Button(
-                            onClick = { sharedState.appTheme = themeId
-                                scope.launch { themeManager.saveTheme(themeId) }},
+                            onClick = {
+                                sharedState.appTheme = themeId
+                                sharedState.saveProgress() // Salvarea corecta si unificata
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .border(width = if (isSelected) 4.dp else 2.dp, color = sharedState.themeTextColor),
@@ -154,7 +150,10 @@ fun SettingsScreen(sharedState: SharedState) {
                                 .clip(CircleShape)
                                 .background(colorValue)
                                 .border(width = if (isColorSelected) 3.dp else 1.dp, color = sharedState.themeTextColor, shape = CircleShape)
-                                .clickable { sharedState.accentColor = colorValue },
+                                .clickable {
+                                    sharedState.accentColor = colorValue
+                                    // Poti adauga si aici sharedState.saveProgress() mai tarziu daca vrei sa salvezi si culoarea de accent
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             if (isColorSelected) {

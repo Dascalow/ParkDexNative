@@ -19,7 +19,19 @@ object ApiClient {
     }
 
     suspend fun getCharacters(): List<CharacterModel> {
-        val response: ApiResponse = client.get("https://spapi.dev/api/characters").body()
-        return response.data
+        val allCharacters = mutableListOf<CharacterModel>()
+        for (page in 1..7) {
+            try {
+                val response: ApiResponse = client.get("https://spapi.dev/api/characters?page=$page").body()
+                allCharacters.addAll(response.data)
+                if (allCharacters.size >= 100) {
+                    break
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                break
+            }
+        }
+        return allCharacters.take(100)
     }
 }
