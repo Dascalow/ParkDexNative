@@ -121,7 +121,6 @@ fun SettingsScreen(sharedState: SharedState) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Container Accent Color
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

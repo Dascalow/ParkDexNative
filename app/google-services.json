@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "576566377365",
+    "project_id": "park-dex-android-auth",
+    "storage_bucket": "park-dex-android-auth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:576566377365:android:988e2aab81ec8fe679549c",
+        "android_client_info": {
+          "package_name": "com.raul.parkdexnative"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_XGrxFQk5xvv61mPjsdsZhNADrwn5kJ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

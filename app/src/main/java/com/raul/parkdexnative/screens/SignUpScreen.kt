@@ -44,7 +44,6 @@ fun SignUpScreen(onSignUpSuccess: () -> Unit, onNavigateToLogin: () -> Unit) {
             .fillMaxSize()
             .background(Color(0xFFEFEFEF))
     ) {
-        // Brazii identici de pe fundal din Login
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
             val height = size.height
@@ -97,7 +96,6 @@ fun SignUpScreen(onSignUpSuccess: () -> Unit, onNavigateToLogin: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Butoanele de sus inversate ca sa arate ca esti pe Sign Up
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -127,7 +125,6 @@ fun SignUpScreen(onSignUpSuccess: () -> Unit, onNavigateToLogin: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Campul de Username
             Text(
                 text = "CHOOSE USERNAME / ALIAS",
                 fontSize = 11.sp,
@@ -155,7 +152,7 @@ fun SignUpScreen(onSignUpSuccess: () -> Unit, onNavigateToLogin: () -> Unit) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Campul Secret Code (Parola)
+
             Text(
                 text = "SECRET CODE",
                 fontSize = 11.sp,
@@ -185,7 +182,6 @@ fun SignUpScreen(onSignUpSuccess: () -> Unit, onNavigateToLogin: () -> Unit) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Campul de Confirmare Parola
             Text(
                 text = "CONFIRM SECRET CODE",
                 fontSize = 11.sp,
@@ -213,7 +209,6 @@ fun SignUpScreen(onSignUpSuccess: () -> Unit, onNavigateToLogin: () -> Unit) {
                 singleLine = true
             )
 
-            // Afisare erori stilizate
             if (errorMessage != null) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -225,7 +220,6 @@ fun SignUpScreen(onSignUpSuccess: () -> Unit, onNavigateToLogin: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Butonul principal de trimitere
             Button(
                 onClick = {
                     val cleanUsername = username.trim().lowercase().replace(" ", "")
@@ -240,14 +234,12 @@ fun SignUpScreen(onSignUpSuccess: () -> Unit, onNavigateToLogin: () -> Unit) {
                         val fakeEmail = "$cleanUsername@parkdex.com"
 
                         isLoading = true
-                        // Apelam Firebase ca sa creeze contul
                         auth.createUserWithEmailAndPassword(fakeEmail, secretCode)
                             .addOnCompleteListener { task ->
                                 isLoading = false
                                 if (task.isSuccessful) {
-                                    onSignUpSuccess() // Cont creat cu succes! Mergem in aplicatie
+                                    onSignUpSuccess()
                                 } else {
-                                    // Daca ceva pica (ex: username deja luat), afisam eroarea de la server
                                     errorMessage = task.exception?.localizedMessage ?: "Registration failed."
                                 }
                             }

@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,8 +22,15 @@ import coil.compose.AsyncImage
 import com.raul.parkdexnative.data.CharacterImageMapper
 import com.raul.parkdexnative.data.SharedState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(sharedState: SharedState) {
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredCharacters = sharedState.favoriteCharacters.filter { character ->
+        character.name.contains(searchQuery, ignoreCase = true)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -35,11 +42,8 @@ fun FavoritesScreen(sharedState: SharedState) {
                 .border(width = 3.dp, color = sharedState.themeTextColor)
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Center
         ) {
-            IconButton(onClick = {}) {
-                Icon(Icons.Default.Menu, contentDescription = null, tint = sharedState.themeTextColor)
-            }
             Text(
                 text = "PARK DEX",
                 fontSize = 22.sp,
@@ -47,9 +51,6 @@ fun FavoritesScreen(sharedState: SharedState) {
                 letterSpacing = (-1).sp,
                 color = sharedState.themeTextColor
             )
-            IconButton(onClick = {}) {
-                Icon(Icons.Default.Search, contentDescription = null, tint = sharedState.themeTextColor)
-            }
         }
 
         Column(
@@ -87,13 +88,51 @@ fun FavoritesScreen(sharedState: SharedState) {
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (sharedState.favoriteCharacters.isNotEmpty()) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Search roster...", color = Color.Gray, fontSize = 14.sp) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = sharedState.themeTextColor) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Clear", tint = sharedState.themeTextColor)
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(width = 3.dp, color = sharedState.themeTextColor, shape = CutCornerShape(8.dp)),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = if (sharedState.appTheme == "dark") Color(0xFF2C2C2C) else Color.White,
+                        unfocusedContainerColor = if (sharedState.appTheme == "dark") Color(0xFF2C2C2C) else Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = sharedState.themeTextColor,
+                        unfocusedTextColor = sharedState.themeTextColor,
+                        cursorColor = sharedState.accentColor
+                    ),
+                    singleLine = true,
+                    shape = CutCornerShape(8.dp)
+                )
+            }
         }
 
         if (sharedState.favoriteCharacters.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No characters saved yet.", color = Color.Gray)
+                Text("No characters saved yet.", color = Color.Gray, fontWeight = FontWeight.Bold)
             }
-        } else {
+        }
+        else if (filteredCharacters.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize().padding(top = 40.dp), contentAlignment = Alignment.TopCenter) {
+                Text("No degenerate found matching '${searchQuery}'.", color = Color.Gray, fontSize = 14.sp)
+            }
+        }
+        else {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -101,8 +140,9 @@ fun FavoritesScreen(sharedState: SharedState) {
                 contentPadding = PaddingValues(bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(sharedState.favoriteCharacters.size) { index ->
-                    val character = sharedState.favoriteCharacters[index]
+
+                items(filteredCharacters.size) { index ->
+                    val character = filteredCharacters[index]
 
                     Column(
                         modifier = Modifier
@@ -121,7 +161,7 @@ fun FavoritesScreen(sharedState: SharedState) {
                         ) {
 
                             AsyncImage(
-                                model = CharacterImageMapper.getImageUrl(character.name), // Schimbat din .id în .name
+                                model = CharacterImageMapper.getImageUrl(character.name),
                                 contentDescription = character.name,
                                 modifier = Modifier
                                     .fillMaxSize()

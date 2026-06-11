@@ -2,6 +2,7 @@ package com.raul.parkdexnative.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -101,40 +102,53 @@ fun AccountScreen(
                         .padding(12.dp)
                 ) {
                     Text("Episodes Seen", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(
-                            onClick = {
-                                if (sharedState.episodesSeen > 0) {
-                                    sharedState.episodesSeen--
-                                    sharedState.saveProgress()
-                                }
-                            },
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Box(
                             modifier = Modifier
-                                .size(24.dp)
-                                .background(if (sharedState.appTheme == "dark") Color(0xFF333333) else Color(0XFFEFEFEF))
-                                .border(1.dp, sharedState.themeTextColor)
+                                .size(28.dp)
+                                .background(if (sharedState.appTheme == "dark") Color(0xFF333333) else Color(0XFFEFEFEF), shape = CutCornerShape(4.dp))
+                                .border(1.dp, sharedState.themeTextColor, shape = CutCornerShape(4.dp))
+                                .clickable {
+                                    if (sharedState.episodesSeen > 0) {
+                                        sharedState.episodesSeen--
+                                        sharedState.saveProgress()
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Remove, contentDescription = null, tint = sharedState.themeTextColor, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.Remove, contentDescription = "Minus", tint = sharedState.themeTextColor, modifier = Modifier.size(16.dp))
                         }
+
                         Text(
                             text = "${sharedState.episodesSeen}",
-                            fontSize = 20.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Black,
                             color = sharedState.themeTextColor,
-                            modifier = Modifier.padding(horizontal = 8.dp)
+                            modifier = Modifier.widthIn(min = 40.dp),
+                            textAlign = TextAlign.Center
                         )
-                        IconButton(
-                            onClick = {
-                                sharedState.episodesSeen++
-                                sharedState.saveProgress()
-                            },
+
+                        Box(
                             modifier = Modifier
-                                .size(24.dp)
-                                .background(if (sharedState.appTheme == "dark") Color(0xFF333333) else Color(0XFFEFEFEF))
-                                .border(1.dp, sharedState.themeTextColor)
+                                .size(28.dp)
+                                .background(if (sharedState.appTheme == "dark") Color(0xFF333333) else Color(0XFFEFEFEF), shape = CutCornerShape(4.dp))
+                                .border(1.dp, sharedState.themeTextColor, shape = CutCornerShape(4.dp))
+                                .clickable {
+                                    if (sharedState.episodesSeen < 339) {
+                                        sharedState.episodesSeen++
+                                        sharedState.saveProgress()
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null, tint = sharedState.themeTextColor, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.Add, contentDescription = "Plus", tint = sharedState.themeTextColor, modifier = Modifier.size(16.dp))
                         }
                     }
                 }
@@ -165,40 +179,71 @@ fun AccountScreen(
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .border(width = 3.dp, color = sharedState.themeTextColor)
-                        .padding(12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(modifier = Modifier
-                        .size(40.dp)
-                        .background(if (sharedState.cheesyPoofsEaten >= 1) Color(0XFF2ECC71) else Color(0XFFF5F5F5))
-                        .border(width = 1.dp, color = Color.Black))
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Grounded!", fontSize = 12.sp, fontWeight = FontWeight.Black, color = sharedState.themeTextColor)
-                    Text("View a character in Explorer.", fontSize = 10.sp, color = Color.Gray, textAlign = TextAlign.Center)
-                }
 
-                Column(
+            val hasPoofAchievement = sharedState.cheesyPoofsEaten >= 10
+            val hasAuthoritahAchievement = sharedState.favoriteCharacters.size >= 4
+
+            if (!hasPoofAchievement && !hasAuthoritahAchievement) {
+
+                Text(
+                    text = "???\nKeep exploring and eating Cheesy Poofs to unlock achievements!",
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier
-                        .weight(1f)
-                        .border(width = 3.dp, color = sharedState.themeTextColor)
-                        .padding(12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .fillMaxWidth()
+                        .border(1.dp, Color.Gray, shape = CutCornerShape(8.dp))
+                        .padding(16.dp)
+                )
+            } else {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Box(modifier = Modifier
-                        .size(40.dp)
-                        .background(if (sharedState.favoriteCharacters.size >= 4) Color(0XFF3498DB) else Color(0XFFF5F5F5))
-                        .border(width = 1.dp, color = Color.Black))
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Respect My Authoritah", fontSize = 12.sp, fontWeight = FontWeight.Black, color = sharedState.themeTextColor, textAlign = TextAlign.Center)
-                    Text("Save 4 characters to Favs.", fontSize = 10.sp, color = Color.Gray, textAlign = TextAlign.Center)
+
+                    if (hasPoofAchievement) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .border(width = 3.dp, color = sharedState.themeTextColor)
+                                .background(if (sharedState.appTheme == "dark") Color(0xFF2C2C2C) else Color.Transparent)
+                                .padding(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(Color(0XFF2ECC71))
+                                    .border(width = 2.dp, color = sharedState.themeTextColor)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Cheesy Lover", fontSize = 12.sp, fontWeight = FontWeight.Black, color = sharedState.themeTextColor)
+                            Text("Ate 10 Cheesy Poofs.", fontSize = 10.sp, color = sharedState.themeTextColor, textAlign = TextAlign.Center)
+                        }
+                    }
+
+                    if (hasAuthoritahAchievement) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .border(width = 3.dp, color = sharedState.themeTextColor)
+                                .background(if (sharedState.appTheme == "dark") Color(0xFF2C2C2C) else Color.Transparent)
+                                .padding(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(Color(0XFF3498DB))
+                                    .border(width = 2.dp, color = sharedState.themeTextColor)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Authoritah!", fontSize = 12.sp, fontWeight = FontWeight.Black, color = sharedState.themeTextColor, textAlign = TextAlign.Center)
+                            Text("Saved 4 characters.", fontSize = 10.sp, color = sharedState.themeTextColor, textAlign = TextAlign.Center)
+                        }
+                    }
                 }
             }
 

@@ -10,9 +10,7 @@ import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,8 +34,6 @@ fun ExplorerScreen(sharedState: SharedState) {
     var searchQuery by remember { mutableStateOf("") }
     val characters = remember { mutableStateListOf<CharacterModel>() }
     val scope = rememberCoroutineScope()
-
-    // REPARAT AICI: Acolada a fost inchisa corect
     var isLoading by remember { mutableStateOf(true) }
     val context = LocalContext.current
 
@@ -45,25 +41,30 @@ fun ExplorerScreen(sharedState: SharedState) {
         scope.launch {
             isLoading = true
             try {
-                // Apeleaza noua functie care aduna 100 de caractere
                 val fetchedCharacters = ApiClient.getCharacters()
                 characters.clear()
+
                 if (fetchedCharacters.isNotEmpty()) {
                     characters.addAll(fetchedCharacters)
+                    sharedState.saveOfflineCache(fetchedCharacters)
                 } else {
                     throw Exception("API returned empty")
                 }
             } catch (e: Exception) {
-                // Daca nu ai net absolut deloc, iti lasa doar familia lui Kyle
                 characters.clear()
-                characters.addAll(
-                    listOf(
-                        CharacterModel(1, "Gerald Broflovski", "Male", "Jewish"),
-                        CharacterModel(2, "Sheila Broflovski", "Female", "Jewish"),
-                        CharacterModel(3, "Kyle Broflovski", "Male", "Jewish"),
-                        CharacterModel(4, "Ike Broflovski", "Male", "Jewish")
+
+                if (sharedState.offlineCharactersCache.isNotEmpty()) {
+                    characters.addAll(sharedState.offlineCharactersCache)
+                } else {
+                    characters.addAll(
+                        listOf(
+                            CharacterModel(1, "Eric Cartman", "Male", "Catholic"),
+                            CharacterModel(2, "Stan Marsh", "Male", "Catholic"),
+                            CharacterModel(3, "Kyle Broflovski", "Male", "Jewish"),
+                            CharacterModel(4, "Kenny McCormick", "Male", "Catholic")
+                        )
                     )
-                )
+                }
             } finally {
                 isLoading = false
             }
@@ -85,11 +86,8 @@ fun ExplorerScreen(sharedState: SharedState) {
                 .border(width = 3.dp, color = sharedState.themeTextColor)
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Center
         ) {
-            IconButton(onClick = {}) {
-                Icon(Icons.Default.Menu, contentDescription = null, tint = sharedState.themeTextColor)
-            }
             Text(
                 text = "PARK DEX",
                 fontSize = 22.sp,
@@ -97,9 +95,6 @@ fun ExplorerScreen(sharedState: SharedState) {
                 letterSpacing = (-1).sp,
                 color = sharedState.themeTextColor
             )
-            IconButton(onClick = {}) {
-                Icon(Icons.Default.Search, contentDescription = null, tint = sharedState.themeTextColor)
-            }
         }
 
         OutlinedTextField(
@@ -160,7 +155,6 @@ fun ExplorerScreen(sharedState: SharedState) {
                                 sharedState.selectedCharacter = character
                             }
                     ) {
-                        // ...
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()

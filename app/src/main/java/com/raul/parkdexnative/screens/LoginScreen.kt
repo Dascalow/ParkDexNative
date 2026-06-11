@@ -30,7 +30,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToSignUp: () -> Unit) {
     var username by remember { mutableStateOf("") }
     var secretCode by remember { mutableStateOf("") }
 
-    // Starile pentru incarcare, eroare si Firebase
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val auth = remember { FirebaseAuth.getInstance() }
@@ -178,8 +177,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToSignUp: () -> Unit) {
                 shape = CutCornerShape(0.dp),
                 singleLine = true
             )
-
-            // AM SCOS TEXTUL DE PAROLA UITATA SI AM PUS MESAJUL DE EROARE AICI
             if (errorMessage != null) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
