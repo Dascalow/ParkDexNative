@@ -59,8 +59,11 @@ fun AccountScreen(
             Spacer(modifier = Modifier.width(16.dp))
 
             Column {
+                val userEmail = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.email ?: "New Kid"
+                val displayName = userEmail.substringBefore("@")
+
                 Text(
-                    text = "New Kid",
+                    text = if (sharedState.isDouchebagMode) "Douchebag" else displayName,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
                     color = Color.Black

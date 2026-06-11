@@ -160,20 +160,20 @@ fun ExplorerScreen(sharedState: SharedState) {
                                 sharedState.selectedCharacter = character
                             }
                     ) {
+                        // ...
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(130.dp)
                                 .background(if (sharedState.appTheme == "dark") Color(0xFF333333) else Color(0XFFEFEFEF))
                         ) {
-                            val imageRequest = ImageRequest.Builder(context)
+                           val imageRequest = coil.request.ImageRequest.Builder(LocalContext.current)
                                 .data(CharacterImageMapper.getImageUrl(character.name))
                                 .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
                                 .crossfade(true)
                                 .build()
-
                             SubcomposeAsyncImage(
-                                model = CharacterImageMapper.getImageUrl(character.name),
+                                model = imageRequest,
                                 contentDescription = character.name,
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -181,13 +181,16 @@ fun ExplorerScreen(sharedState: SharedState) {
                                 contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                                 loading = {
                                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                        CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(24.dp))
+                                        CircularProgressIndicator(color = sharedState.themeTextColor, modifier = Modifier.size(24.dp))
                                     }
                                 },
                                 error = {
-                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                        Icon(Icons.Default.Warning, contentDescription = "Error", tint = Color.Red)
-                                    }
+                                    val fallbackName = character.name.replace(" ", "+")
+                                    SubcomposeAsyncImage(
+                                        model = "https://ui-avatars.com/api/?name=$fallbackName&background=34495E&color=fff&size=256&bold=true&length=2",
+                                        contentDescription = "Fallback",
+                                        modifier = Modifier.fillMaxSize()
+                                    )
                                 }
                             )
 

@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Switch
 import androidx.compose.ui.unit.sp
 import com.raul.parkdexnative.data.SharedState
 
@@ -90,7 +91,7 @@ fun SettingsScreen(sharedState: SharedState) {
                         Button(
                             onClick = {
                                 sharedState.appTheme = themeId
-                                sharedState.saveProgress() // Salvarea corecta si unificata
+                                sharedState.saveProgress()
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -152,7 +153,6 @@ fun SettingsScreen(sharedState: SharedState) {
                                 .border(width = if (isColorSelected) 3.dp else 1.dp, color = sharedState.themeTextColor, shape = CircleShape)
                                 .clickable {
                                     sharedState.accentColor = colorValue
-                                    // Poti adauga si aici sharedState.saveProgress() mai tarziu daca vrei sa salvezi si culoarea de accent
                                 },
                             contentAlignment = Alignment.Center
                         ) {
@@ -163,6 +163,49 @@ fun SettingsScreen(sharedState: SharedState) {
                     }
                 }
             }
+        }
+        Text(
+            text = "Character Settings",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Black,
+            color = sharedState.themeTextColor,
+            modifier = Modifier.padding(vertical = 12.dp)
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(width = 3.dp, color = sharedState.themeTextColor)
+                .background(if (sharedState.appTheme == "dark") Color(0xFF2C2C2C) else Color(0XFFF5F5F5))
+                .padding(14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Stick of Truth Mode",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = sharedState.themeTextColor
+                )
+                Text(
+                    text = "Call me 'Douchebag' instead of my real name",
+                    fontSize = 10.sp,
+                    color = Color.Gray
+                )
+            }
+
+            Switch(
+                checked = sharedState.isDouchebagMode,
+                onCheckedChange = {
+                    sharedState.isDouchebagMode = it
+                    sharedState.saveProgress()
+                },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = sharedState.accentColor,
+                    checkedTrackColor = sharedState.accentColor.copy(alpha = 0.5f)
+                )
+            )
         }
     }
 }

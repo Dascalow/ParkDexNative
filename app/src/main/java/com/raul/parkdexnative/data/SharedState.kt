@@ -3,38 +3,40 @@ package com.raul.parkdexnative.data
 import android.content.Context
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore // Am adaugat importul corect aici
+import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-// DEFINIM DATASTORE AICI GLOBAL, PE FIECARE TELEFON.
-// Astfel nu mai avem nevoie de niciun import din folderul UI!
 val Context.dataStore by preferencesDataStore(name = "user_settings")
 
 class SharedState(private val context: Context) {
     private val scope = CoroutineScope(Dispatchers.IO)
-
-    private val FAVORITES_KEY = stringPreferencesKey("favorite_characters")
-    private val EPISODES_KEY = intPreferencesKey("episodes_seen")
-    private val POOFS_KEY = intPreferencesKey("cheesy_poofs_eaten")
-    private val THEME_KEY = stringPreferencesKey("app_theme")
-
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val currentUid: String
+        get() = auth.currentUser?.uid ?: "guest"
+
+    private val FAVORITES_KEY get() = stringPreferencesKey("favorite_characters_$currentUid")
+    private val EPISODES_KEY get() = intPreferencesKey("episodes_seen_$currentUid")
+    private val POOFS_KEY get() = intPreferencesKey("cheesy_poofs_eaten_$currentUid")
+    private val THEME_KEY get() = stringPreferencesKey("app_theme_$currentUid")
+    private val DOUCHEBAG_KEY get() = booleanPreferencesKey("is_douchebag_$currentUid") // Am salvat si Douchebag mode!
 
     val favoriteCharacters = mutableStateListOf<CharacterModel>()
     var episodesSeen by mutableStateOf(0)
     var cheesyPoofsEaten by mutableStateOf(0)
     var appTheme by mutableStateOf("classic")
+    var isDouchebagMode by mutableStateOf(true)
 
     var selectedCharacter by mutableStateOf<CharacterModel?>(null)
     var accentColor by mutableStateOf(Color(0xFF17A2B8))
@@ -43,25 +45,27 @@ class SharedState(private val context: Context) {
         loadAllData()
     }
 
-    private fun loadAllData() {
+    // 2. Acum cand dam refresh (sau la pornire), aplicatia stie CUI sa ii ceara datele
+    fun loadAllData() {
         scope.launch {
             try {
-                context.dataStore.data.collect { prefs ->
-                    val jsonFavs = prefs[FAVORITES_KEY] ?: "[]"
-                    val list = Json.decodeFromString<List<CharacterModel>>(jsonFavs)
-                    val savedEpisodes = prefs[EPISODES_KEY] ?: 0
-                    val savedPoofs = prefs[POOFS_KEY] ?: 0
-                    val savedTheme = prefs[THEME_KEY] ?: "classic"
+                // Citim dintr-un foc setarile pentru UID-ul curent
+                val prefs = context.dataStore.data.first()
 
-                    launch(Dispatchers.Main) {
-                        if (favoriteCharacters.size != list.size) {
-                            favoriteCharacters.clear()
-                            favoriteCharacters.addAll(list)
-                        }
-                        if (episodesSeen != savedEpisodes) episodesSeen = savedEpisodes
-                        if (cheesyPoofsEaten != savedPoofs) cheesyPoofsEaten = savedPoofs
-                        if (appTheme != savedTheme) appTheme = savedTheme
-                    }
+                val jsonFavs = prefs[FAVORITES_KEY] ?: "[]"
+                val list = try { Json.decodeFromString<List<CharacterModel>>(jsonFavs) } catch (e: Exception) { emptyList() }
+                val savedEpisodes = prefs[EPISODES_KEY] ?: 0
+                val savedPoofs = prefs[POOFS_KEY] ?: 0
+                val savedTheme = prefs[THEME_KEY] ?: "classic"
+                val savedDouchebag = prefs[DOUCHEBAG_KEY] ?: true
+
+                launch(Dispatchers.Main) {
+                    favoriteCharacters.clear()
+                    favoriteCharacters.addAll(list)
+                    episodesSeen = savedEpisodes
+                    cheesyPoofsEaten = savedPoofs
+                    appTheme = savedTheme
+                    isDouchebagMode = savedDouchebag
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -74,18 +78,21 @@ class SharedState(private val context: Context) {
         val currentEps = episodesSeen
         val currentPoofs = cheesyPoofsEaten
         val currentTheme = appTheme
+        val currentDouchebag = isDouchebagMode
 
         scope.launch {
             try {
-                // Acum aplicatia va gasi baza de date locala si va salva pe bune!
+                // 3. Salvam in sertarul specific acestui utilizator
                 val jsonFavs = Json.encodeToString(currentFavs)
                 context.dataStore.edit { prefs ->
                     prefs[FAVORITES_KEY] = jsonFavs
                     prefs[EPISODES_KEY] = currentEps
                     prefs[POOFS_KEY] = currentPoofs
                     prefs[THEME_KEY] = currentTheme
+                    prefs[DOUCHEBAG_KEY] = currentDouchebag
                 }
 
+                // Salvarea Cloud in Firebase ramane intacta (e deja facuta perfect de tine!)
                 val user = auth.currentUser
                 if (user != null) {
                     val firebaseFavs = currentFavs.map { char ->
@@ -102,7 +109,8 @@ class SharedState(private val context: Context) {
                         "favorites" to firebaseFavs,
                         "episodesSeen" to currentEps,
                         "cheesyPoofsEaten" to currentPoofs,
-                        "appTheme" to currentTheme
+                        "appTheme" to currentTheme,
+                        "isDouchebagMode" to currentDouchebag // L-am trimis si in nori
                     )
                     firestore.collection("users").document(user.uid).set(data)
                 }
