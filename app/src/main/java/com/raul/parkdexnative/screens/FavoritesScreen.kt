@@ -161,7 +161,7 @@ fun FavoritesScreen(sharedState: SharedState) {
                         ) {
 
                             AsyncImage(
-                                model = CharacterImageMapper.getImageUrl(character.name),
+                                model = CharacterImageMapper.getImageUrl(character.id,character.name),
                                 contentDescription = character.name,
                                 modifier = Modifier
                                     .fillMaxSize()

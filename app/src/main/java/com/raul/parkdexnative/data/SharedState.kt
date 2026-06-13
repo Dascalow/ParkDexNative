@@ -47,6 +47,8 @@ class SharedState(private val context: Context) {
     var accentColor by mutableStateOf(Color(0xFF17A2B8))
 
     init {
+        CharacterImageMapper.loadAssets(context)
+        CharacterBioMapper.loadLore(context)
         loadAllData()
     }
 

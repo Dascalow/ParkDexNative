@@ -1,24 +1,34 @@
 package com.raul.parkdexnative.data
 
+import android.content.Context
+import kotlinx.serialization.json.Json
+
 object CharacterImageMapper {
-    fun getImageUrl(characterName: String): String {
+    private var assetMap: Map<String, CharacterAsset> = emptyMap()
 
-        val formattedName = characterName.replace(" ", "_").replace("\"", "")
-        val exceptions = mapOf(
-            "Mr. Garrison" to "https://southpark.wiki.gg/wiki/Special:FilePath/MrGarrison.png", // Fara punct
-            "Towelie" to "https://southpark.wiki.gg/wiki/Special:FilePath/Towelie.png",
-            "Sheila Broflovski" to "https://southpark.wiki.gg/wiki/Special:FilePath/MrsBroflovski.png",
-            "Kyle Broflovski" to "https://southpark.wiki.gg/wiki/Special:FilePath/Kyle-broflovski.png",
-            "Ike Broflovski" to "https://southpark.wiki.gg/wiki/Special:FilePath/Ike-current.png",
-            "Kyle's Elephant" to "https://southpark.wiki.gg/wiki/Special:FilePath/Elephant.png",
-            "Cleo Broflovski" to "https://southpark.wiki.gg/wiki/Special:FilePath/CleoBroflovski.png",
+    fun loadAssets(context: Context) {
+        if (assetMap.isNotEmpty()) return
+        try {
+            val jsonString = context.assets.open("characters_assets.json").bufferedReader().use { it.readText() }
 
-
-        )
-
-        if (exceptions.containsKey(characterName)) {
-            return exceptions[characterName]!!
+            val jsonParser = Json { ignoreUnknownKeys = true }
+            assetMap = jsonParser.decodeFromString<Map<String, CharacterAsset>>(jsonString)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+    }
+
+    fun getImageUrl(characterId: Int, fallbackName: String): String {
+        val asset = assetMap[characterId.toString()]
+
+        if (asset != null && asset.imageUrl.isNotEmpty()) {
+            return if (asset.imageUrl.startsWith("/")) {
+                "https://southpark.wiki.gg${asset.imageUrl}"
+            } else {
+                asset.imageUrl
+            }
+        }
+        val formattedName = fallbackName.replace(" ", "_").replace("\"", "")
         return "https://southpark.wiki.gg/wiki/Special:FilePath/$formattedName.png"
     }
 }
